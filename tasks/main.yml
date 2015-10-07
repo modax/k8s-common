@@ -1,0 +1,4 @@
+---
+
+- name: K8s-Common Main
+  debug: msg='Load K8s common defaults/handlers'

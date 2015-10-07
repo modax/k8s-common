@@ -1,0 +1,21 @@
+
+
+- name: K8s-Common | Create manifests directory
+  file: path={{k8s_manifests_dir}}/{{appname}} state=directory
+
+- name: K8s-Common | Write conf files
+  template: src={{templates_path}}/{{item.file}} dest={{k8s_manifests_dir}}/{{appname}}/{{item.file|basename}}
+  with_items: k8s_resources
+  register: files_changed
+
+- debug: msg="{{item.item.name}}-{{appname}}"
+  with_items: files_changed.results
+
+- name: K8s-Common | Start resources
+  kube:
+    name: "{{item.item.name}}-{{appname}}"
+    namespace: "{{item.item.namespace|default(k8s_namespace)|default('default')}}"
+    resource: "{{item.item.resource}}"
+    filename: "{{k8s_manifests_dir}}/{{appname}}/{{item.item.file|basename}}"
+    state: "{{ item.item.state | default(item.changed | ternary('latest','present')) }}"
+  with_items: files_changed.results

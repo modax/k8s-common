@@ -31,5 +31,5 @@
     namespace: "{{item.item.namespace|default(k8s_namespace)|default('default')}}"
     resource: "{{item.item.resource}}"
     filename: "{{k8s_manifests_dir}}/{{item.item.file|basename}}"
-    state: "{{ item.changed | ternary('latest','present') }}"
+    state: "{{ item.item.state | default(item.changed | ternary('latest','present')) }}"
   with_items: files_changed.results

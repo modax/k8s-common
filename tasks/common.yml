@@ -3,18 +3,16 @@
   file: path={{k8s_manifests_dir}} state=directory
 
 - name: K8s-Common | Write namespace file
-  template: src=namespace.yml dest="{{k8s_manifests_dir}}/{{item.namespace}}.yml"
-  with_items: k8s_resources
-  when: ( item.namespace is defined and item.namespace != "default" )
+  template: src=namespace.yml dest="{{k8s_manifests_dir}}/{{k8s_namespace}}.yml"
+  when: k8s_namespace is defined
 
-- name: K8s-Common | Create missing namespace
+- name: K8s-Common | Create namespace if needed
   kube:
-    name: "{{item.namespace}}"
+    name: "{{k8s_namespace}}"
     resource: "ns"
-    filename: "{{k8s_manifests_dir}}/{{item.namespace}}.yml"
+    filename: "{{k8s_manifests_dir}}/{{k8s_namespace}}.yml"
     state: "present"
-  with_items: k8s_resources
-  when: ( item.namespace is defined and item.namespace != "default" )
+  when: k8s_namespace is defined
   ignore_errors: yes
 
 - name: K8s-Common | Write conf files

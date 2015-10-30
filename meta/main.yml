@@ -5,8 +5,8 @@ galaxy_info:
   license: MIT
   min_ansible_version: 1.7
 
-  categories:
-  - cloud
-  - clustering
-  - system
-dependencies: []
+#  categories:
+#  - cloud
+#  - clustering
+#  - system
+#dependencies: []

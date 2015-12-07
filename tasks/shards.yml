@@ -1,0 +1,23 @@
+---
+- name: K8s-Common Shards | Create manifests directory
+  file: path={{k8s_manifests_dir}}/{{k8s_namespace}}/{{shard_prefix}}-{{item.name}} state=directory
+  with_items: k8s_shards
+
+- name: K8s-Common Shards | Write conf files
+  template: src={{templates_path}}/{{item[0].file}} dest={{k8s_manifests_dir}}/{{k8s_namespace}}/{{shard_prefix}}-{{item[1].name}}/{{item[0].file|basename}} backup=yes
+  when: "{{item[0].sharded is defined and item[0].sharded == True}}"
+  with_nested:
+    - rmq_resources
+    - rmq_shards
+  register: files_changed
+
+
+- name: K8s-Common | Shards Start resources
+  kube:
+    name: "{{item.item[0].name}}-{{item.item[1].name}}"
+    namespace: "{{item.item[0].namespace|default(k8s_namespace)|default('default')}}"
+    resource: "{{item.item[0].resource}}"
+    filename: "{{k8s_manifests_dir}}/{{k8s_namespace}}/{{shard_prefix}}-{{item.item[1].name}}/{{item.item[0].file|basename}}"
+    state: "{{k8s_state | default(item.item[0].state) | default(item.changed | ternary('latest','present')) }}"
+  when: "{{item.skipped is not defined or item.skipped == False}}"
+  with_items: files_changed.results

@@ -1,2 +1,4 @@
 ---
 templates_path: "{{role_path}}/templates"
+k8s_shards: []
+shard_prefix: shard

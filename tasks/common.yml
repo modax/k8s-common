@@ -1,22 +1,22 @@
 ---
 - name: K8s-Common | Create manifests directory
-  file: path={{k8s_manifests_dir}} state=directory
+  file: path={{k8s_manifests_dir}}/{{k8s_namespace}} state=directory
 
 - name: K8s-Common | Write namespace file
-  template: src=namespace.yml dest="{{k8s_manifests_dir}}/{{k8s_namespace}}.yml"
+  template: src=namespace.yml dest="{{k8s_manifests_dir}}/{{k8s_namespace}}-ns.yml" backup=yes
   when: k8s_namespace is defined
 
 - name: K8s-Common | Create namespace if needed
   kube:
     name: "{{k8s_namespace}}"
     resource: "ns"
-    filename: "{{k8s_manifests_dir}}/{{k8s_namespace}}.yml"
+    filename: "{{k8s_manifests_dir}}/{{k8s_namespace}}-ns.yml"
     state: "present"
   when: k8s_namespace is defined
   ignore_errors: yes
 
 - name: K8s-Common | Write conf files
-  template: src={{templates_path}}/{{item.file}} dest={{k8s_manifests_dir}}/{{item.file|basename}}
+  template: src={{templates_path}}/{{item.file}} dest={{k8s_manifests_dir}}/{{k8s_namespace}}/{{item.file|basename}} backup=yes
   with_items: k8s_resources
   register: files_changed
 
@@ -28,6 +28,6 @@
     name: "{{item.item.name}}"
     namespace: "{{item.item.namespace|default(k8s_namespace)|default('default')}}"
     resource: "{{item.item.resource}}"
-    filename: "{{k8s_manifests_dir}}/{{item.item.file|basename}}"
-    state: "{{ item.item.state | default(item.changed | ternary('latest','present')) }}"
+    filename: "{{k8s_manifests_dir}}/{{k8s_namespace}}/{{item.item.file|basename}}"
+    state: "{{k8s_state | default(item.item.state) | default(item.changed | ternary('latest','present')) }}"
   with_items: files_changed.results

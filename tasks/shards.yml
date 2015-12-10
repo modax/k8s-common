@@ -7,8 +7,8 @@
   template: src={{templates_path}}/{{item[0].file}} dest={{k8s_manifests_dir}}/{{k8s_namespace}}/{{shard_prefix}}-{{item[1].name}}/{{item[0].file|basename}} backup=yes
   when: "{{item[0].sharded is defined and item[0].sharded == True}}"
   with_nested:
-    - rmq_resources
-    - rmq_shards
+    - k8s_resources
+    - k8s_shards
   register: files_changed
 
 

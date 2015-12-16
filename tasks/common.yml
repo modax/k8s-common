@@ -32,3 +32,4 @@
   with_items: files_changed.results
 
 - include: shards.yml
+  when: "{{k8s_shards is defined and k8s_shards|length > 0}}"
